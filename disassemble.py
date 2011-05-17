@@ -163,7 +163,29 @@ fieldTableCount = b16toui(classBytes[bytesIdx:bytesIdx + 2])
 bytesIdx += 2
 debug(["Field table has {0} entries".format(fieldTableCount)])
 if fieldTableCount != 0:
-    raise Exception("Unimplemented!")
+    fieldAccessFlags = b16toui(classBytes[bytesIdx:bytesIdx + 2])
+    fieldNameIdx = b16toui(classBytes[bytesIdx + 2:bytesIdx + 4])
+    fieldDescriptorIdx = b16toui(classBytes[bytesIdx + 4:bytesIdx + 6])
+    fieldAttrCount = b16toui(classBytes[bytesIdx + 6:bytesIdx + 8])
+    bytesIdx += 8
+
+    fieldAttrs = []
+    for j in range(fieldAttrCount):
+        attrNameIdx = b16toui(classBytes[bytesIdx:bytesIdx + 2])
+        attrLength = struct.unpack("!I", classBytes[bytesIdx + 2:bytesIdx + 6])[0]
+        attrInfo = classBytes[bytesIdx + 6:bytesIdx + 6 + attrLength]
+        bytesIdx += 6 + attrLength
+        methodAttrs.append((attrNameIdx, attrLength, attrInfo))
+
+    msgs = [
+        "Field:",
+        "    Access flags: {0}".format(hex(fieldAccessFlags)),
+        "    Name: {0} => {1}".format(fieldNameIdx, constantPool[fieldNameIdx - 1]),
+        "    Descriptor: {0} => {1}".format(fieldDescriptorIdx, constantPool[fieldDescriptorIdx - 1]),
+        "    Additional attributes: {0}".format(fieldAttrCount)
+    ]
+    msgs.extend(["        Attr: {0}".format(fieldAttr) for fieldAttr in fieldAttrs])
+    debug(msgs)
 
 # Handle method table
 methodTableCount = b16toui(classBytes[bytesIdx:bytesIdx + 2])
