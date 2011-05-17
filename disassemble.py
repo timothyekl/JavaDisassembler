@@ -5,6 +5,9 @@ import sys
 
 DEBUG = True
 
+bytesIdx = 0
+classBytes = b''
+
 def error(strList):
     for s in strList:
         print(s)
@@ -14,12 +17,13 @@ def debug(strList):
     if DEBUG:
         for s in strList:
             print(s)
+        bytepos()
         print()
 
-def bytepos(bytesIdx, classBytes):
+def bytepos():
+    global bytesIdx, classBytes
     if DEBUG:
         print("Read {0}/{1} bytes in class file".format(bytesIdx, len(classBytes)))
-        print()
 
 def b16toui(b):
     if len(b) != 2:
@@ -43,6 +47,7 @@ debug(["Found bytes: {0}".format(classBytes)])
 
 # Check magic number for Java class file
 magicNumber = classBytes[0:4]
+bytesIdx += 4
 if magicNumber != b'\xca\xfe\xba\xbe':
     error(["Invalid magic number: '{0}'".format(magicNumber.decode("ascii")), "Did you supply a valid Java class file?"])
 debug(["Checked magic number: CAFEBABE"])
@@ -50,6 +55,7 @@ debug(["Checked magic number: CAFEBABE"])
 # Check JVM major/minor version
 minorVersion = b16toui(classBytes[4:6])
 majorVersion = b16toui(classBytes[6:8])
+bytesIdx += 4
 majorVersions = {
     50 : "J2SE 6.0",
     49 : "J2SE 5.0",
@@ -109,6 +115,7 @@ constantEvaluate = {
     12 : (lambda x : (b16toui(x[0:2]), b16toui(x[2:4]))),
 }
 constantPool = []
+print("Working with {0} constant pool count...".format(constantPoolCount))
 for i in range(constantPoolCount - 1):
     tag = classBytes[bytesIdx]
     bytesIdx += 1
@@ -203,4 +210,4 @@ debug(msgs)
 
 # Error-check
 if bytesIdx != len(classBytes):
-    error("Finished disassembling, but didn't read all bytes from file")
+    error(["Finished disassembling, but didn't read all bytes from file"])
