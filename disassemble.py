@@ -162,7 +162,7 @@ if interfaceTableCount != 0:
 fieldTableCount = b16toui(classBytes[bytesIdx:bytesIdx + 2])
 bytesIdx += 2
 debug(["Field table has {0} entries".format(fieldTableCount)])
-if fieldTableCount != 0:
+for i in range(fieldTableCount):
     fieldAccessFlags = b16toui(classBytes[bytesIdx:bytesIdx + 2])
     fieldNameIdx = b16toui(classBytes[bytesIdx + 2:bytesIdx + 4])
     fieldDescriptorIdx = b16toui(classBytes[bytesIdx + 4:bytesIdx + 6])
